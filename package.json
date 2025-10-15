@@ -1,0 +1,19 @@
+{
+  "name": "monorepo",
+  "private": true,
+  "packageManager": "npm@10.2.8",
+  "workspaces": [
+    "front",
+    "api"
+  ],
+  "scripts": {
+    "start:front": "npm run start --workspace=front",
+    "start:api": "npm run start --workspace=api",
+
+    "build:front": "npm run build --workspace=front",
+    "build:api": "npm run build --workspace=api",
+
+    "test:front": "npm run test --workspace=front",
+    "test:api": "npm run test --workspace=api"
+  }
+}
