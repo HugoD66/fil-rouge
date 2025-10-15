@@ -9,11 +9,22 @@
   "scripts": {
     "start:front": "npm run start --workspace=front",
     "start:api": "npm run start --workspace=api",
-
     "build:front": "npm run build --workspace=front",
     "build:api": "npm run build --workspace=api",
-
     "test:front": "npm run test --workspace=front",
     "test:api": "npm run test --workspace=api"
+  },
+  "devDependencies": {
+    "@angular-eslint/builder": "^20.4.0",
+    "@angular-eslint/eslint-plugin": "^20.4.0",
+    "@angular-eslint/eslint-plugin-template": "^20.4.0",
+    "@angular-eslint/schematics": "^20.4.0",
+    "@angular-eslint/template-parser": "^20.4.0",
+    "@angular-eslint/utils": "^20.4.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@typescript-eslint/utils": "^8.46.1",
+    "eslint": "^9.37.0",
+    "eslint-plugin-n": "^17.23.1"
   }
 }

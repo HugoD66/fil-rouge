@@ -16,11 +16,12 @@ while true; do
   echo "Sélection du projet:"
   PS3="Projet \#> "
   target=""
-  select opt in "front" "api" "Quitter"; do
+  select opt in "front" "api" "lint" "Quitter"; do
     case "$REPLY" in
       1) target="front"; break ;;
       2) target="api"; break ;;
-      3) exit 0 ;;
+      3) target="lint"; break ;;
+      4) exit 0 ;;
       *) echo "Choix invalide." ;;
     esac
   done
@@ -29,21 +30,40 @@ while true; do
     echo
     echo "Actions pour '$target':"
     PS3="Action \#> "
-    select action in "up (lancer le serveur)" "Retour" "Quitter"; do
-      case "$REPLY" in
-        1)
-          echo
-          echo "Démarrage du serveur '$target'..."
-          echo "---------------------------------"
-          # Nécessite un script 'start' dans le package du workspace
-          npm run start --workspace="$target"
-          echo
-          echo "Processus terminé pour '$target'."
-          ;;
-        2) break 2 ;;  # Retour à la sélection du projet
-        3) exit 0 ;;
-        *) echo "Choix invalide." ;;
-      esac
-    done
+
+    if [[ "$target" == "lint" ]]; then
+      select action in "lint (ESLint global)" "Retour" "Quitter"; do
+        case "$REPLY" in
+          1)
+            echo
+            echo "Exécution d'ESLint sur le monorepo..."
+            echo "-------------------------------------"
+            npx eslint .
+            echo
+            echo "Lint terminé."
+            ;;
+          2) break 2 ;;  # Retour à la sélection du projet
+          3) exit 0 ;;
+          *) echo "Choix invalide." ;;
+        esac
+      done
+    else
+      select action in "up (lancer le serveur)" "Retour" "Quitter"; do
+        case "$REPLY" in
+          1)
+            echo
+            echo "Démarrage du serveur '$target'..."
+            echo "---------------------------------"
+            # Nécessite un script 'start' dans le package du workspace
+            npm run start --workspace="$target"
+            echo
+            echo "Processus terminé pour '$target'."
+            ;;
+          2) break 2 ;;  # Retour à la sélection du projet
+          3) exit 0 ;;
+          *) echo "Choix invalide." ;;
+        esac
+      done
+    fi
   done
 done
