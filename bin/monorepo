@@ -6,6 +6,67 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
+# --- Helpers -----------------------------------------------------------------
+kill_port() {
+  local port="$1"
+  local pids=""
+  echo "→ Vérification du port $port..."
+
+  if command -v lsof >/dev/null 2>&1; then
+    # Processus à l'écoute (LISTEN) sur port TCP donné
+    pids="$(lsof -t -iTCP:${port} -sTCP:LISTEN 2>/dev/null || true)"
+  fi
+
+  if [[ -z "${pids}" ]] && command -v fuser >/dev/null 2>&1; then
+    # fuser retourne les PIDs sur ce port
+    # shellcheck disable=SC2046
+    pids="$(fuser -n tcp ${port} 2>/dev/null | tr -s ' ' '\n' || true)"
+  fi
+
+  if [[ -n "${pids}" ]]; then
+    echo "  Port ${port} occupé par PID(s) : ${pids}"
+    # Tentative d'arrêt propre
+    kill -TERM ${pids} 2>/dev/null || true
+    sleep 1
+    # Si ça tourne encore, on force
+    for pid in ${pids}; do
+      if kill -0 "${pid}" 2>/dev/null; then
+        echo "  PID ${pid} toujours actif — envoi SIGKILL..."
+        kill -KILL "${pid}" 2>/dev/null || true
+      fi
+    done
+    echo "  Port ${port} libéré."
+    return 0
+  else
+    echo "  Aucun processus en écoute sur le port ${port}."
+    return 0
+  fi
+}
+
+stop_servers() {
+  echo
+  echo "Arrêt des serveurs de dev (ports 4200 et 3000)"
+  echo "----------------------------------------------"
+  local ok=0
+
+  kill_port 4200 || ok=1
+  kill_port 3000 || ok=1
+
+  # Filets de sécurité : si aucun PID trouvé mais un process reste collé,
+  # on tente des pkill sur des patterns de dev courants.
+  echo "→ Filet de sécurité (pkill sur patterns connus)..."
+  pkill -f "ng serve" 2>/dev/null || true
+  pkill -f "vite dev" 2>/dev/null || true
+  pkill -f "nest start" 2>/dev/null || true
+  pkill -f "node.*webpack-dev-server" 2>/dev/null || true
+
+  echo "Arrêt terminé."
+  echo
+  read -rp "Appuie sur Entrée pour revenir au menu..." _
+}
+
+# -----------------------------------------------------------------------------
+
 # Astuces d'affichage
 clear
 echo "Monorepo CLI"
@@ -19,11 +80,16 @@ while true; do
   echo "Sélection du projet:"
   PS3="Projet \\#> "
   target=""
-  select opt in "front" "api" "lint" "Quitter"; do
+  select opt in "front" "api" "lint" "stop servers" "Quitter"; do
     case "$opt" in
       "front") target="front"; break ;;
       "api") target="api"; break ;;
       "lint") target="lint"; break ;;
+      "stop servers")
+        stop_servers
+        # On revient au menu projet après l'arrêt
+        continue 2
+        ;;
       "Quitter") exit 0 ;;
       *) echo "Choix invalide." ;;
     esac
@@ -60,7 +126,6 @@ while true; do
             echo
             echo "----- Erreurs / Warnings (api) -----"
             if grep -i -E 'error|warning' "$api_log" >/dev/null 2>&1; then
-              # affiche les lignes correspondantes avec numéros
               grep -n -i -E 'error|warning' "$api_log" || true
             else
               echo "(Aucun 'error' ou 'warning' trouvé dans le log de api.)"
@@ -126,4 +191,3 @@ while true; do
     fi
   done
 done
-
