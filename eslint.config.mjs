@@ -11,8 +11,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Résout les tsconfig de façon absolue afin que ESLint fonctionne
-// que l'on lance depuis la racine du repo ou depuis un workspace.
 const candidateTsconfigs = [
     path.join(__dirname, "tsconfig.json"),
     path.join(__dirname, "front", "tsconfig.json"),
@@ -21,29 +19,22 @@ const candidateTsconfigs = [
 const tsconfigProjects = candidateTsconfigs.filter(p => fs.existsSync(p));
 
 export default [
-    // Base JS
     js.configs.recommended,
-
-    // Override pour tous les fichiers TypeScript du monorepo
     {
         files: ["**/*.ts"],
         languageOptions: {
             parser: tsParser,
             parserOptions: {
-                // chemins absolus vers les tsconfig présents
                 project: tsconfigProjects,
-                // utile pour @typescript-eslint
                 tsconfigRootDir: __dirname,
                 sourceType: "module",
                 ecmaVersion: "latest"
             },
             globals: {
-                // globals bannière pour prévenir les erreurs `no-undef` côté front
                 console: "readonly",
                 window: "readonly",
                 document: "readonly",
                 navigator: "readonly",
-                // timers (navigateur et node)
                 setTimeout: "readonly",
                 clearTimeout: "readonly",
                 setInterval: "readonly",
@@ -57,9 +48,7 @@ export default [
             n
         },
         rules: {
-            // Désactiver la règle JS de base et laisser la version TS la prendre en charge
             "no-unused-vars": "off",
-
             "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
             "@typescript-eslint/consistent-type-imports": ["error"],
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],
@@ -71,8 +60,6 @@ export default [
             "@typescript-eslint/prefer-optional-chain": ["error"],
             "@typescript-eslint/no-unnecessary-type-assertion": ["error"],
             "@typescript-eslint/switch-exhaustiveness-check": ["error"],
-
-            // Angular (classes & sélecteurs)
             "@angular-eslint/component-class-suffix": ["error", { suffixes: ["Component"] }],
             "@angular-eslint/directive-class-suffix": ["error", { suffixes: ["Directive"] }],
             "@angular-eslint/component-selector": [
@@ -86,8 +73,6 @@ export default [
             "@angular-eslint/no-empty-lifecycle-method": ["warn"]
         }
     },
-
-    // Règles spécifiques aux fichiers API (Node/Nest)
     {
         files: ["api/**/*.ts"],
         rules: {
@@ -95,8 +80,6 @@ export default [
             "n/no-unsupported-features/es-syntax": ["error"]
         }
     },
-
-    // Templates Angular (HTML)
     {
         files: ["front/**/*.html"],
         languageOptions: {
@@ -105,12 +88,7 @@ export default [
         plugins: {
             "@angular-eslint/template": angularTemplate
         },
-        rules: {
-            // règles de template si nécessaire
-        }
     },
-
-    // Fichiers de tests unitaires (Jest) — déclare les symboles fournis par Jest
     {
         files: ["**/*.spec.ts", "**/__tests__/**"],
         languageOptions: {
@@ -125,8 +103,6 @@ export default [
             }
         }
     },
-
-    // Fichiers serveur (Node) — déclare `process`, `__dirname`, etc.
     {
         files: ["**/*server.ts", "server.ts"],
         languageOptions: {
@@ -139,8 +115,6 @@ export default [
             }
         }
     },
-
-    // Ignorer les dossiers de build/dep
     {
         ignores: [
             "**/dist/**",

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "fil-rouge-requests",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

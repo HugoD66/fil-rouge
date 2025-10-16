@@ -10,12 +10,4 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'front';
-
-  var = true;
-
-  constructor() {
-    setTimeout(() => {
-      this.var = false;
-    }, 1000)
-  }
 }
