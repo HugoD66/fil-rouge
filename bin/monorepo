@@ -12,16 +12,19 @@ echo "Monorepo CLI"
 echo "============"
 echo
 
+TMPDIR="$(mktemp -d -t monorepo-lint-XXXX)"
+trap 'rm -rf "$TMPDIR"' EXIT
+
 while true; do
   echo "Sélection du projet:"
-  PS3="Projet \#> "
+  PS3="Projet \\#> "
   target=""
   select opt in "front" "api" "lint" "Quitter"; do
-    case "$REPLY" in
-      1) target="front"; break ;;
-      2) target="api"; break ;;
-      3) target="lint"; break ;;
-      4) exit 0 ;;
+    case "$opt" in
+      "front") target="front"; break ;;
+      "api") target="api"; break ;;
+      "lint") target="lint"; break ;;
+      "Quitter") exit 0 ;;
       *) echo "Choix invalide." ;;
     esac
   done
@@ -29,28 +32,87 @@ while true; do
   while true; do
     echo
     echo "Actions pour '$target':"
-    PS3="Action \#> "
+    PS3="Action \\#> "
 
     if [[ "$target" == "lint" ]]; then
-      select action in "lint (ESLint global)" "Retour" "Quitter"; do
-        case "$REPLY" in
-          1)
+      select action in "lint & fix (api + front)" "Retour" "Quitter"; do
+        case "$action" in
+          "lint & fix (api + front)")
             echo
-            echo "Exécution d'ESLint sur le monorepo..."
+            echo "Exécution du lint + fix sur les workspaces 'api' et 'front'..."
+            echo "------------------------------------------------------------"
+
+            api_status=0
+            front_status=0
+
+            api_log="$TMPDIR/api-lint.log"
+            front_log="$TMPDIR/front-lint.log"
+
+            echo
+            echo "=> api: npm run lint --workspace=api -- --fix (logs: $api_log)"
+            if ! npm run lint --workspace=api -- --fix >"$api_log" 2>&1; then
+              api_status=$?
+              echo "Lint api échoué (status $api_status) — voir $api_log"
+            else
+              echo "Lint api OK — voir $api_log"
+            fi
+
+            # Affiche les erreurs/warnings extraits du log api
+            echo
+            echo "----- Erreurs / Warnings (api) -----"
+            if grep -i -E 'error|warning' "$api_log" >/dev/null 2>&1; then
+              # affiche les lignes correspondantes avec numéros
+              grep -n -i -E 'error|warning' "$api_log" || true
+            else
+              echo "(Aucun 'error' ou 'warning' trouvé dans le log de api.)"
+            fi
             echo "-------------------------------------"
-            npx eslint .
+
             echo
-            echo "Lint terminé."
+            echo "=> front: npm run lint --workspace=front -- --fix (logs: $front_log)"
+            if ! npm run lint --workspace=front -- --fix >"$front_log" 2>&1; then
+              front_status=$?
+              echo "Lint front échoué (status $front_status) — voir $front_log"
+            else
+              echo "Lint front OK — voir $front_log"
+            fi
+
+            # Affiche les erreurs/warnings extraits du log front
+            echo
+            echo "----- Erreurs / Warnings (front) -----"
+            if grep -i -E 'error|warning' "$front_log" >/dev/null 2>&1; then
+              grep -n -i -E 'error|warning' "$front_log" || true
+            else
+              echo "(Aucun 'error' ou 'warning' trouvé dans le log de front.)"
+            fi
+            echo "---------------------------------------"
+
+            if [ "$api_status" -ne 0 ] || [ "$front_status" -ne 0 ]; then
+              echo
+              echo "Résumé des statuts : api=$api_status front=$front_status"
+              echo "Les logs complets se trouvent dans :"
+              echo "  $api_log"
+              echo "  $front_log"
+              echo
+              echo "Appuie sur Entrée pour retourner au menu..."
+              read -r
+              break
+            fi
+
+            echo
+            echo "Lint & fix terminé pour api + front. Appuie sur Entrée pour retourner au menu..."
+            read -r
+            break
             ;;
-          2) break 2 ;;  # Retour à la sélection du projet
-          3) exit 0 ;;
+          "Retour") break 2 ;;
+          "Quitter") exit 0 ;;
           *) echo "Choix invalide." ;;
         esac
       done
     else
       select action in "up (lancer le serveur)" "Retour" "Quitter"; do
-        case "$REPLY" in
-          1)
+        case "$action" in
+          "up (lancer le serveur)")
             echo
             echo "Démarrage du serveur '$target'..."
             echo "---------------------------------"
@@ -59,11 +121,12 @@ while true; do
             echo
             echo "Processus terminé pour '$target'."
             ;;
-          2) break 2 ;;  # Retour à la sélection du projet
-          3) exit 0 ;;
+          "Retour") break 2 ;;
+          "Quitter") exit 0 ;;
           *) echo "Choix invalide." ;;
         esac
       done
     fi
   done
 done
+

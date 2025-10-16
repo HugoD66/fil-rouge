@@ -1,24 +1,53 @@
-// eslint.config.mjs
 import js from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import angular from "@angular-eslint/eslint-plugin";
 import angularTemplate from "@angular-eslint/eslint-plugin-template";
 import n from "eslint-plugin-n";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Résout les tsconfig de façon absolue afin que ESLint fonctionne
+// que l'on lance depuis la racine du repo ou depuis un workspace.
+const candidateTsconfigs = [
+    path.join(__dirname, "tsconfig.json"),
+    path.join(__dirname, "front", "tsconfig.json"),
+    path.join(__dirname, "api", "tsconfig.json")
+];
+const tsconfigProjects = candidateTsconfigs.filter(p => fs.existsSync(p));
 
 export default [
     // Base JS
     js.configs.recommended,
 
-    // --- TypeScript commun (front + api) ---
+    // Override pour tous les fichiers TypeScript du monorepo
     {
         files: ["**/*.ts"],
         languageOptions: {
             parser: tsParser,
             parserOptions: {
-                project: ["./front/tsconfig.json", "./api/tsconfig.json"],
+                // chemins absolus vers les tsconfig présents
+                project: tsconfigProjects,
+                // utile pour @typescript-eslint
+                tsconfigRootDir: __dirname,
                 sourceType: "module",
                 ecmaVersion: "latest"
+            },
+            globals: {
+                // globals bannière pour prévenir les erreurs `no-undef` côté front
+                console: "readonly",
+                window: "readonly",
+                document: "readonly",
+                navigator: "readonly",
+                // timers (navigateur et node)
+                setTimeout: "readonly",
+                clearTimeout: "readonly",
+                setInterval: "readonly",
+                clearInterval: "readonly"
             }
         },
         plugins: {
@@ -28,8 +57,10 @@ export default [
             n
         },
         rules: {
-            // TS - bonnes pratiques
-            "@typescript-eslint/no-unused-vars": ["error"],
+            // Désactiver la règle JS de base et laisser la version TS la prendre en charge
+            "no-unused-vars": "off",
+
+            "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
             "@typescript-eslint/consistent-type-imports": ["error"],
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],
             "@typescript-eslint/no-explicit-any": ["warn"],
@@ -56,7 +87,7 @@ export default [
         }
     },
 
-    // --- Spécifique API (Node/Nest) : règles plugin-n seulement sur api ---
+    // Règles spécifiques aux fichiers API (Node/Nest)
     {
         files: ["api/**/*.ts"],
         rules: {
@@ -65,25 +96,51 @@ export default [
         }
     },
 
-    // --- Templates Angular (HTML) ---
+    // Templates Angular (HTML)
     {
         files: ["front/**/*.html"],
         languageOptions: {
-            // IMPORTANT: plus de "processor" ; on utilise le parser HTML d'Angular ESLint
-            parser: await import("@angular-eslint/template-parser")
-                .then(m => m.default ?? m)
+            parser: await import("@angular-eslint/template-parser").then(m => m.default ?? m)
         },
         plugins: {
             "@angular-eslint/template": angularTemplate
         },
         rules: {
-            // Ajoute ici des règles de template si tu veux (exemples possibles) :
-            // "@angular-eslint/template/banana-in-box": "error",
-            // "@angular-eslint/template/no-negated-async": "warn"
+            // règles de template si nécessaire
         }
     },
 
-    // --- Ignores globaux ---
+    // Fichiers de tests unitaires (Jest) — déclare les symboles fournis par Jest
+    {
+        files: ["**/*.spec.ts", "**/__tests__/**"],
+        languageOptions: {
+            globals: {
+                describe: "readonly",
+                it: "readonly",
+                test: "readonly",
+                expect: "readonly",
+                beforeEach: "readonly",
+                afterEach: "readonly",
+                jest: "readonly"
+            }
+        }
+    },
+
+    // Fichiers serveur (Node) — déclare `process`, `__dirname`, etc.
+    {
+        files: ["**/*server.ts", "server.ts"],
+        languageOptions: {
+            globals: {
+                process: "readonly",
+                __dirname: "readonly",
+                module: "readonly",
+                require: "readonly",
+                console: "readonly"
+            }
+        }
+    },
+
+    // Ignorer les dossiers de build/dep
     {
         ignores: [
             "**/dist/**",

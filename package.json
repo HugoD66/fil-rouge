@@ -1,7 +1,7 @@
 {
   "name": "monorepo",
   "private": true,
-  "packageManager": "npm@10.2.8",
+  "packageManager": "npm@11.6.2",
   "workspaces": [
     "front",
     "api"
@@ -12,7 +12,10 @@
     "build:front": "npm run build --workspace=front",
     "build:api": "npm run build --workspace=api",
     "test:front": "npm run test --workspace=front",
-    "test:api": "npm run test --workspace=api"
+    "test:api": "npm run test --workspace=api",
+    "lint:front": "npm run lint --workspace=front",
+    "lint:api": "npm run lint --workspace=api",
+    "lint:all": "npm run lint --workspace=api -- --fix && npm run lint --workspace=front -- --fix"
   },
   "devDependencies": {
     "@angular-eslint/builder": "^20.4.0",
