@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "start:front": "npm run start --workspace=front",
-    "start:api": "npm run start --workspace=api",
+    "start:api": "npm run start:dev --workspace=api",
     "build:front": "npm run build --workspace=front",
     "build:api": "npm run build --workspace=api",
 

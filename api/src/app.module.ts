@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from '@fil-rouge/api/app.controller';
 import { AppService } from '@fil-rouge/api/app.service';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 import Joi from 'joi';
 
 @Module({
@@ -17,6 +18,7 @@ import Joi from 'joi';
         CORS_ORIGIN: Joi.string().allow('', null),
       }),
     }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
