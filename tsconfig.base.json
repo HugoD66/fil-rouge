@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@fil-rouge/api/*": ["api/src/*"],
+      "@fil-rouge/front/*": ["front/src/*"],
+      "@fil-rouge/*": ["libs/*/src/index.ts"]
+    }
+  }
+}
