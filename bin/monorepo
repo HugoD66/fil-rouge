@@ -13,22 +13,18 @@ kill_port() {
   echo "→ Vérification du port $port..."
 
   if command -v lsof >/dev/null 2>&1; then
-    # Processus à l'écoute (LISTEN) sur port TCP donné
     pids="$(lsof -t -iTCP:${port} -sTCP:LISTEN 2>/dev/null || true)"
   fi
 
   if [[ -z "${pids}" ]] && command -v fuser >/dev/null 2>&1; then
-    # fuser retourne les PIDs sur ce port
     # shellcheck disable=SC2046
     pids="$(fuser -n tcp ${port} 2>/dev/null | tr -s ' ' '\n' || true)"
   fi
 
   if [[ -n "${pids}" ]]; then
     echo "  Port ${port} occupé par PID(s) : ${pids}"
-    # Tentative d'arrêt propre
     kill -TERM ${pids} 2>/dev/null || true
     sleep 1
-    # Si ça tourne encore, on force
     for pid in ${pids}; do
       if kill -0 "${pid}" 2>/dev/null; then
         echo "  PID ${pid} toujours actif — envoi SIGKILL..."
@@ -36,24 +32,20 @@ kill_port() {
       fi
     done
     echo "  Port ${port} libéré."
-    return 0
   else
     echo "  Aucun processus en écoute sur le port ${port}."
-    return 0
   fi
+  return 0
 }
 
 stop_servers() {
   echo
   echo "Arrêt des serveurs de dev (ports 4200 et 3000)"
   echo "----------------------------------------------"
-  local ok=0
 
-  kill_port 4200 || ok=1
-  kill_port 3000 || ok=1
+  kill_port 4200 || true
+  kill_port 3000 || true
 
-  # Filets de sécurité : si aucun PID trouvé mais un process reste collé,
-  # on tente des pkill sur des patterns de dev courants.
   echo "→ Filet de sécurité (pkill sur patterns connus)..."
   pkill -f "ng serve" 2>/dev/null || true
   pkill -f "vite dev" 2>/dev/null || true
@@ -67,7 +59,6 @@ stop_servers() {
 
 # -----------------------------------------------------------------------------
 
-# Astuces d'affichage
 clear
 echo "Monorepo CLI"
 echo "============"
@@ -88,7 +79,6 @@ while true; do
       "tests") target="tests"; break ;;
       "stop servers")
         stop_servers
-        # On revient au menu projet après l'arrêt
         continue 2
         ;;
       "Quitter") exit 0 ;;
@@ -109,17 +99,13 @@ while true; do
             echo "Exécution du lint + fix sur les workspaces 'api' et 'front'..."
             echo "------------------------------------------------------------"
 
-            api_status=0
-            front_status=0
-
             api_log="$TMPDIR/api-lint.log"
             front_log="$TMPDIR/front-lint.log"
 
             echo
             echo "=> api: npm run lint --workspace=api -- --fix (logs: $api_log)"
             if ! npm run lint --workspace=api -- --fix >"$api_log" 2>&1; then
-              api_status=$?
-              echo "Lint api échoué (status $api_status) — voir $api_log"
+              echo "Lint api échoué — voir $api_log"
             else
               echo "Lint api OK — voir $api_log"
             fi
@@ -136,8 +122,7 @@ while true; do
             echo
             echo "=> front: npm run lint --workspace=front -- --fix (logs: $front_log)"
             if ! npm run lint --workspace=front -- --fix >"$front_log" 2>&1; then
-              front_status=$?
-              echo "Lint front échoué (status $front_status) — voir $front_log"
+              echo "Lint front échoué — voir $front_log"
             else
               echo "Lint front OK — voir $front_log"
             fi
@@ -150,18 +135,6 @@ while true; do
               echo "(Aucun 'error' ou 'warning' trouvé dans le log de front.)"
             fi
             echo "---------------------------------------"
-
-            if [ "$api_status" -ne 0 ] || [ "$front_status" -ne 0 ]; then
-              echo
-              echo "Résumé des statuts : api=$api_status front=$front_status"
-              echo "Les logs complets se trouvent dans :"
-              echo "  $api_log"
-              echo "  $front_log"
-              echo
-              echo "Appuie sur Entrée pour retourner au menu..."
-              read -r
-              break
-            fi
 
             echo
             echo "Lint & fix terminé pour api + front. Appuie sur Entrée pour retourner au menu..."
@@ -203,21 +176,56 @@ while true; do
       done
 
     else
-      select action in "up" "Retour" "Quitter"; do
-        case "$action" in
-          "up")
-            echo
-            echo "Démarrage du serveur '$target'..."
-            echo "---------------------------------"
-            npm run start --workspace="$target"
-            echo
-            echo "Processus terminé pour '$target'."
-            ;;
-          "Retour") break 2 ;;
-          "Quitter") exit 0 ;;
-          *) echo "Choix invalide." ;;
-        esac
-      done
+      # Sous-menus spécifiques par cible
+      if [[ "$target" == "front" ]]; then
+        select action in "up" "OpenAPI generation (models only)" "Retour" "Quitter"; do
+          case "$action" in
+            "up")
+              echo
+              echo "Démarrage du serveur 'front'..."
+              echo "-------------------------------"
+              npm run start --workspace=front
+              echo
+              echo "Processus terminé pour 'front'."
+              ;;
+            "OpenAPI generation (models only)")
+              echo
+              echo "Génération des modèles OpenAPI pour le front (openapi-typescript-codegen)..."
+              echo "----------------------------------------------------------------------------"
+              # Nécessite que l'API expose /docs-json (en dev)
+              if ! npm run gen:api-models --workspace=front; then
+                echo
+                echo "❌ Échec de la génération."
+                echo "   Vérifie que l'API tourne et expose /docs-json (ex: npm run start:api:dev)."
+              else
+                echo "✅ Modèles générés : front/src/app/api/models/* (et index.ts)"
+              fi
+              echo
+              read -rp "Appuie sur Entrée pour revenir..." _
+              ;;
+            "Retour") break 2 ;;
+            "Quitter") exit 0 ;;
+            *) echo "Choix invalide." ;;
+          esac
+        done
+      else
+        # Sous-menu 'api'
+        select action in "up" "Retour" "Quitter"; do
+          case "$action" in
+            "up")
+              echo
+              echo "Démarrage du serveur 'api'..."
+              echo "-----------------------------"
+              npm run start --workspace=api
+              echo
+              echo "Processus terminé pour 'api'."
+              ;;
+            "Retour") break 2 ;;
+            "Quitter") exit 0 ;;
+            *) echo "Choix invalide." ;;
+          esac
+        done
+      fi
     fi
   done
 done

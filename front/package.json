@@ -8,8 +8,8 @@
     "lint": "eslint . --ext .ts,.html",
     "lint:fix": "eslint . --ext .ts,.html --fix",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
+    "test": "ng test",
+    "gen:api-models": "openapi --input http://localhost:3000/docs-json --output src/app/api --exportCore false --exportServices false --exportModels true --useUnionTypes true"  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^18.1.0",
@@ -40,6 +40,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "openapi-typescript": "^7.10.1",
+    "openapi-typescript-codegen": "^0.29.0",
     "typescript": "~5.5.2"
   }
 }
