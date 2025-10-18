@@ -11,11 +11,15 @@
     "start:api": "npm run start --workspace=api",
     "build:front": "npm run build --workspace=front",
     "build:api": "npm run build --workspace=api",
-    "test:front": "npm run test --workspace=front",
-    "test:api": "npm run test --workspace=api",
+
     "lint:front": "npm run lint --workspace=front",
     "lint:api": "npm run lint --workspace=api",
-    "lint:all": "npm run lint --workspace=api -- --fix && npm run lint --workspace=front -- --fix"
+    "lint:all": "npm run lint --workspace=api -- --fix && npm run lint --workspace=front -- --fix",
+
+    "test:api:rib": "npm run test --workspace=api -- --runInBand",
+    "test:front:ci": "npm run test --workspace=front -- --watch=false",
+    "test:all": "npm run test:api:rib && npm run test:front:ci"
+
   },
   "devDependencies": {
     "@angular-eslint/builder": "^20.4.0",

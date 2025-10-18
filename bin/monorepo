@@ -80,11 +80,12 @@ while true; do
   echo "Sélection du projet:"
   PS3="Projet \\#> "
   target=""
-  select opt in "front" "api" "lint" "stop servers" "Quitter"; do
+  select opt in "front" "api" "lint" "tests" "stop servers" "Quitter"; do
     case "$opt" in
       "front") target="front"; break ;;
       "api") target="api"; break ;;
       "lint") target="lint"; break ;;
+      "tests") target="tests"; break ;;
       "stop servers")
         stop_servers
         # On revient au menu projet après l'arrêt
@@ -101,9 +102,9 @@ while true; do
     PS3="Action \\#> "
 
     if [[ "$target" == "lint" ]]; then
-      select action in "lint & fix (api + front)" "Retour" "Quitter"; do
+      select action in "lint & fix" "Retour" "Quitter"; do
         case "$action" in
-          "lint & fix (api + front)")
+          "lint & fix")
             echo
             echo "Exécution du lint + fix sur les workspaces 'api' et 'front'..."
             echo "------------------------------------------------------------"
@@ -172,10 +173,39 @@ while true; do
           *) echo "Choix invalide." ;;
         esac
       done
-    else
-      select action in "up (lancer le serveur)" "Retour" "Quitter"; do
+
+    elif [[ "$target" == "tests" ]]; then
+      select action in "run (api RIB → front)" "api only (RIB)" "front only" "Retour" "Quitter"; do
         case "$action" in
-          "up (lancer le serveur)")
+          "run (api RIB → front)")
+            echo
+            echo "Lancement des tests API (runInBand) puis FRONT..."
+            echo "-----------------------------------------------"
+            npm run test:all
+            echo
+            read -rp "Appuie sur Entrée pour retourner au menu..." _
+            break
+            ;;
+          "api only (RIB)")
+            npm run test:api:rib || true
+            echo
+            read -rp "Appuie sur Entrée pour retourner..." _
+            ;;
+          "front only")
+            npm run test:front:ci || true
+            echo
+            read -rp "Appuie sur Entrée pour retourner..." _
+            ;;
+          "Retour") break 2 ;;
+          "Quitter") exit 0 ;;
+          *) echo "Choix invalide." ;;
+        esac
+      done
+
+    else
+      select action in "up" "Retour" "Quitter"; do
+        case "$action" in
+          "up")
             echo
             echo "Démarrage du serveur '$target'..."
             echo "---------------------------------"
