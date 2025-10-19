@@ -16,6 +16,7 @@ import Joi from 'joi';
       validationSchema: Joi.object({
         PORT: Joi.number().default(3000),
         CORS_ORIGIN: Joi.string().allow('', null),
+        DOMAIN: Joi.string().allow('', null),
       }),
     }),
     UserModule,

@@ -1,0 +1,22 @@
+meta {
+  name: UserController_update
+  type: http
+  seq: 4
+}
+
+patch {
+  url: http://user/{id}
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "firstName": "",
+    "lastName": ""
+  }
+}

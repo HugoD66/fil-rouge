@@ -4,10 +4,9 @@ import { User } from '@fil-rouge/api/user/entities/user.entity';
 @Injectable()
 export class AppService {
   getHello(): User {
-    const user: User = {
+    return {
       firstName: 'Test',
       lastName: 'Generation',
     };
-    return user;
   }
 }

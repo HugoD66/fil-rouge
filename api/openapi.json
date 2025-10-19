@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/user": {
+      "post": {
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      },
+      "get": {
+        "operationId": "UserController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "operationId": "UserController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      },
+      "patch": {
+        "operationId": "UserController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Fil-rouge API",
+    "description": "Schéma OpenAPI pour génération des types front",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName"
+        ]
+      }
+    }
+  }
+}

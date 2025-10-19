@@ -4,13 +4,15 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import type { Request, Response } from 'express';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('PORT', 3000);
-  const corsOrigin = config.get<string>('CORS_ORIGIN');
+  const port = Number(config.get('PORT')) || 3000;
+  const domain = config.get<string>('DOMAIN') ?? undefined;
+  const corsOrigin = config.get<string>('CORS_ORIGIN') || undefined;
 
   // ✅ Validation globale des DTO
   app.useGlobalPipes(
@@ -40,15 +42,26 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, swaggerCfg);
 
-    // Expose uniquement le JSON du schéma
-    app.getHttpAdapter().get('/docs-json', (req, res) => {
-      res.json(document);
-    });
+    app
+      .getHttpAdapter()
+      .get('/docs-json', (req: Request, res: Response): void => {
+        res.type('application/json').send(document);
+      });
+
+    try {
+      const { writeFileSync } = await import('fs');
+      writeFileSync('openapi.json', JSON.stringify(document, null, 2), 'utf-8');
+
+      console.log('📝 openapi.json généré au démarrage (dev)');
+    } catch (e) {
+      console.error('Impossible d’écrire openapi.json :', e);
+    }
   }
 
   await app.listen(port);
-  console.log(`✅ API running on http://localhost:${port}`);
-  console.log(`📄 OpenAPI JSON: http://localhost:${port}/docs-json`);
+
+  console.log(`✅ API running on http://${domain}:${port}`);
+  console.log(`📄 OpenAPI JSON: http://${domain}:${port}/docs-json`);
 }
 
 void bootstrap();

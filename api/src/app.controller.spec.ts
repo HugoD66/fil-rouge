@@ -16,7 +16,16 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+      //expect(appController.getHello()).toBe('Hello World!');
+      //Sortie attendue : const user: User = {
+      //       firstName: 'Test',
+      //       lastName: 'Generation',
+      //     };
+
+      expect(appController.getHello()).toEqual({
+        firstName: 'Test',
+        lastName: 'Generation',
+      });
     });
   });
 });
