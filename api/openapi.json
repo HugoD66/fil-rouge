@@ -1,50 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/": {
-      "get": {
-        "operationId": "AppController_getHello",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "App"
-        ]
-      }
-    },
     "/user": {
-      "post": {
-        "operationId": "UserController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "User"
-        ]
-      },
       "get": {
         "operationId": "UserController_findAll",
         "parameters": [],
@@ -132,6 +89,54 @@
           "User"
         ]
       }
+    },
+    "/security/register": {
+      "post": {
+        "operationId": "SecurityController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Security"
+        ]
+      }
+    },
+    "/security/login": {
+      "post": {
+        "operationId": "SecurityController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Security"
+        ]
+      }
     }
   },
   "info": {
@@ -144,49 +149,56 @@
   "servers": [],
   "components": {
     "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "firstName",
-          "lastName"
-        ]
-      },
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 50
-          },
-          "lastName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 50
-          }
-        },
-        "required": [
-          "firstName",
-          "lastName"
-        ]
-      },
       "UpdateUserDto": {
         "type": "object",
         "properties": {
           "firstName": {
             "type": "string",
             "minLength": 2,
-            "maxLength": 50
+            "maxLength": 50,
+            "example": "Pierre"
           },
           "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "example@email.com"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "Pierre"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "example@email.com"
+          },
+          "password": {
             "type": "string",
             "minLength": 2,
             "maxLength": 50
@@ -194,7 +206,29 @@
         },
         "required": [
           "firstName",
-          "lastName"
+          "lastName",
+          "email",
+          "password"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "example": "example@email.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "email",
+          "password"
         ]
       }
     }

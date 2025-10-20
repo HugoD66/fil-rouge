@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto } from '@fil-rouge/api/user/dto/update-user.dto';
+import { UserDto } from '@fil-rouge/api/user/dto/user.dto';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  public findAll(): UserDto[] {
+    const userOne = {
+      id: '0000-0000-0000-0001',
+      firstName: 'Pierre',
+      lastName: 'Michael',
+      email: 'example@email.com',
+    };
+    const userTwo = {
+      id: '0000-0000-0000-0002',
+      firstName: 'Pierro',
+      lastName: 'Michaell',
+      email: 'example2@email.com',
+    };
+
+    return [userOne, userTwo];
   }
 
-  findAll() {
-    return `This action returns all user`;
+  public findOne(id: number): UserDto {
+    console.log(id);
+    const userOne = {
+      id: '0000-0000-0000-0001',
+      firstName: 'Pierre',
+      lastName: 'Michael',
+      email: 'example@email.com',
+    };
+    return userOne;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  public update(id: number, updateUserDto: UpdateUserDto): UpdateUserDto {
+    console.log('id:', id);
+    return updateUserDto;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  public remove(id: number): void {
+    console.log('id:', id);
+    return;
   }
 }

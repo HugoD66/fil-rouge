@@ -2,37 +2,39 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@fil-rouge/api/app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import {
+  ValidationPipe,
+  ClassSerializerInterceptor,
+  INestApplication,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app: INestApplication = await NestFactory.create(AppModule);
 
   const config = app.get(ConfigService);
   const port = Number(config.get('PORT')) || 3000;
   const domain = config.get<string>('DOMAIN') ?? undefined;
   const corsOrigin = config.get<string>('CORS_ORIGIN') || undefined;
 
-  // ✅ Validation globale des DTO
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      forbidUnknownValues: false,
-    }),
-  );
+  configureGlobalValidationAndSerialization(app);
 
-  // ✅ Sérialisation uniforme
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-  // ✅ CORS
   if (corsOrigin) {
     app.enableCors({ origin: corsOrigin });
   }
 
-  // ✅ Swagger JSON uniquement (pas d’UI)
+  await configureSwaggerIfDev(app);
+
+  await app.listen(port);
+
+  console.log(`✅ API running on http://${domain}:${port}`);
+  console.log(`📄 OpenAPI JSON: http://${domain}:${port}/docs-json`);
+}
+
+async function configureSwaggerIfDev(
+  app: INestApplication<any>,
+): Promise<void> {
   if (process.env.NODE_ENV !== 'production') {
     const swaggerCfg = new DocumentBuilder()
       .setTitle('Fil-rouge API')
@@ -57,11 +59,21 @@ async function bootstrap(): Promise<void> {
       console.error('Impossible d’écrire openapi.json :', e);
     }
   }
+}
 
-  await app.listen(port);
+function configureGlobalValidationAndSerialization(
+  app: INestApplication<any>,
+): void {
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      forbidUnknownValues: false,
+    }),
+  );
 
-  console.log(`✅ API running on http://${domain}:${port}`);
-  console.log(`📄 OpenAPI JSON: http://${domain}:${port}/docs-json`);
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }
 
 void bootstrap();

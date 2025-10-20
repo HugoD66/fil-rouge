@@ -55,8 +55,8 @@ Key outputs/ports:
   - Watch: npm run test:watch --workspace=api
   - Coverage: npm run test:cov --workspace=api
   - E2E: npm run test:e2e --workspace=api
-  - Run a single test file: npm run test --workspace=api -- src/app.controller.spec.ts
-  - Filter by test name: npm run test --workspace=api -- -t "should return \"Hello World!\""
+  - Run a single test file: npm run test --workspace=api -- src/user.controller.spec.ts
+  - Filter by test name: npm run test --workspace=api -- -t "should return \"An user\""
 
 ## Linting & Formatting
 

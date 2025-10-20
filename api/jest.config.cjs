@@ -10,7 +10,6 @@ module.exports = {
     transform: { '^.+\\.(t|j)s$': 'ts-jest' },
     collectCoverageFrom: ['<rootDir>/**/*.(t|j)s'],
     coverageDirectory: '<rootDir>/../coverage',
-    // mappe les alias TS (@fil-rouge/...) pour Jest
     moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
         prefix: '<rootDir>/',
     }),

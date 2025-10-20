@@ -1,6 +1,8 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
+/* tslint:disable */
+ 
 
-export type { CreateUserDto } from './models/CreateUserDto';
+export type { LoginDto } from './models/LoginDto';
+export type { RegisterDto } from './models/RegisterDto';
 export type { UpdateUserDto } from './models/UpdateUserDto';
-export type { User } from './models/User';
