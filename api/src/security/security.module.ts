@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
-import { SecurityService } from '@fil-rouge/api/security/security.service';
-import { SecurityController } from '@fil-rouge/api/security/security.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SecurityService } from './security.service';
+import { SecurityController } from './security.controller';
+import { Person } from '@fil-rouge/api/person/entities/person.entity';
 
 @Module({
-  controllers: [SecurityController],
+  imports: [TypeOrmModule.forFeature([Person])],
   providers: [SecurityService],
+  controllers: [SecurityController],
+  exports: [SecurityService, TypeOrmModule],
 })
 export class SecurityModule {}

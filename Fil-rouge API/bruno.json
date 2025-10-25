@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Fil-rouge API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

@@ -1,0 +1,24 @@
+meta {
+  name: PersonController_update
+  type: http
+  seq: 3
+}
+
+patch {
+  url: http://Person/{id}
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "firstName": "",
+    "lastName": "",
+    "email": "",
+    "updatedAt": ""
+  }
+}

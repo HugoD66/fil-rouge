@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node", "supertest"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["**/*.e2e-spec.ts", "setup-e2e.ts"]
+}

@@ -1,6 +1,6 @@
 # Dépendances (tous workspaces)
 node_modules/
-
+api/pgadmin/
 # Lockfiles (racine et sous-projets)
 package-lock.json
 yarn.lock

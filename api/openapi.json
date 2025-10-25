@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/user": {
+    "/person": {
       "get": {
-        "operationId": "UserController_findAll",
+        "operationId": "PersonController_findAll",
         "parameters": [],
         "responses": {
           "200": {
@@ -11,13 +11,13 @@
           }
         },
         "tags": [
-          "User"
+          "Person"
         ]
       }
     },
-    "/user/{id}": {
+    "/person/{id}": {
       "get": {
-        "operationId": "UserController_findOne",
+        "operationId": "PersonController_findOne",
         "parameters": [
           {
             "name": "id",
@@ -34,11 +34,11 @@
           }
         },
         "tags": [
-          "User"
+          "Person"
         ]
       },
       "patch": {
-        "operationId": "UserController_update",
+        "operationId": "PersonController_update",
         "parameters": [
           {
             "name": "id",
@@ -54,7 +54,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateUserDto"
+                "$ref": "#/components/schemas/UpdatePersonDto"
               }
             }
           }
@@ -65,28 +65,19 @@
           }
         },
         "tags": [
-          "User"
+          "Person"
         ]
       },
       "delete": {
-        "operationId": "UserController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "PersonController_remove",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         },
         "tags": [
-          "User"
+          "Person"
         ]
       }
     },
@@ -149,7 +140,7 @@
   "servers": [],
   "components": {
     "schemas": {
-      "UpdateUserDto": {
+      "UpdatePersonDto": {
         "type": "object",
         "properties": {
           "firstName": {
@@ -169,12 +160,18 @@
             "minLength": 2,
             "maxLength": 50,
             "example": "example@email.com"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T12:00:00Z"
           }
         },
         "required": [
           "firstName",
           "lastName",
-          "email"
+          "email",
+          "updatedAt"
         ]
       },
       "RegisterDto": {

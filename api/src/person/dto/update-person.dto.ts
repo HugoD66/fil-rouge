@@ -8,11 +8,11 @@ import {
   Length,
 } from 'class-validator';
 
-export class UpdateUserDto {
-  @IsUUID('4')
+export class UpdatePersonDto {
+  /*@IsUUID('4')
   @IsNotEmpty()
   @IsString()
-  public id: string;
+  public id!: string;*/
 
   @ApiProperty({
     minLength: 2,
@@ -22,17 +22,21 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @Length(2, 50)
-  firstName?: string;
+  public firstName?: string;
 
   @ApiProperty({ minLength: 2, maxLength: 50, example: 'Dupont' })
   @IsString()
   @IsOptional()
   @Length(2, 50)
-  lastName?: string;
+  public lastName?: string;
 
   @ApiProperty({ minLength: 2, maxLength: 50, example: 'example@email.com' })
   @IsString()
   @IsEmail()
   @IsOptional()
   public email?: string;
+
+  @ApiProperty({ type: Date, example: '2024-01-01T12:00:00Z' })
+  @IsNotEmpty()
+  public updatedAt!: Date;
 }

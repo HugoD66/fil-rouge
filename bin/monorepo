@@ -210,22 +210,75 @@ while true; do
         done
       else
         # Sous-menu 'api'
-        select action in "up" "Retour" "Quitter"; do
-          case "$action" in
-            "up")
-              echo
-              echo "Démarrage du serveur 'api'..."
-              echo "-----------------------------"
-              npm run start --workspace=api
-              echo
-              echo "Processus terminé pour 'api'."
-              ;;
-            "Retour") break 2 ;;
-            "Quitter") exit 0 ;;
-            *) echo "Choix invalide." ;;
-          esac
-        done
-      fi
+         select action in "up" "migrations: generate" "migrations: run" "migrations: revert" "Retour" "Quitter"; do
+                  case "$action" in
+                    "up")
+                      echo
+                      echo "Démarrage du serveur 'api'..."
+                      echo "-----------------------------"
+                      npm run start --workspace=api
+                      echo
+                      echo "Processus terminé pour 'api'."
+                      ;;
+
+                    "migrations: generate")
+                      echo
+                      echo "Génération d'une migration TypeORM (db:gen)..."
+                      echo "---------------------------------------------"
+                      echo "=> npm run db:gen --workspace=api"
+                      if ! npm run db:gen --workspace=api; then
+                        echo "❌ Échec de la génération de migration."
+                      else
+                        echo "✅ Migration générée dans src/db/migrations."
+                      fi
+                      echo
+                      read -rp "Appuie sur Entrée pour revenir..." _
+                      ;;
+
+                    "migrations: run")
+                      echo
+                      echo "Compilation de l'API (pré-requis pour db:run sur dist/)..."
+                      echo "---------------------------------------------------------"
+                      npm run build --workspace=api || { echo "❌ Build échoué, annulation."; read -rp "Entrée pour revenir..." _; continue; }
+
+                      echo
+                      echo "Exécution des migrations (db:run)..."
+                      echo "-----------------------------------"
+                      echo "=> npm run db:run --workspace=api"
+                      if ! npm run db:run --workspace=api; then
+                        echo "❌ Échec de l'exécution des migrations."
+                      else
+                        echo "✅ Migrations appliquées."
+                      fi
+                      echo
+                      read -rp "Appuie sur Entrée pour revenir..." _
+                      ;;
+
+                    "migrations: revert")
+                      echo
+                      echo "Compilation de l'API (pré-requis pour db:revert sur dist/)..."
+                      echo "-------------------------------------------------------------"
+                      npm run build --workspace=api || { echo "❌ Build échoué, annulation."; read -rp "Entrée pour revenir..." _; continue; }
+
+                      echo
+                      echo "Revert de la dernière migration (db:revert)..."
+                      echo "----------------------------------------------"
+                      echo "=> npm run db:revert --workspace=api"
+                      if ! npm run db:revert --workspace=api; then
+                        echo "❌ Échec du revert de migration."
+                      else
+                        echo "✅ Dernière migration annulée."
+                      fi
+                      echo
+                      read -rp "Appuie sur Entrée pour revenir..." _
+                      ;;
+
+                    "Retour") break 2 ;;
+                    "Quitter") exit 0 ;;
+                    *) echo "Choix invalide." ;;
+                  esac
+                done
+              fi
     fi
   done
 done

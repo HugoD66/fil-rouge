@@ -1,1 +1,84 @@
-<p>register-form works!</p>
+<div class="m-auto max-w-md flex flex-col">
+  <h2 class="text-2xl font-bold mb-4">Register</h2>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col space-y-4">
+
+    <!-- First name -->
+    <div>
+      <label for="firstName" class="block mb-1">First name</label>
+      <input
+        id="firstName"
+        type="text"
+        formControlName="firstName"
+        [ngClass]="inputClasses('firstName')"
+        placeholder="Pierre"
+      />
+      @if(isInvalid('firstName')) {
+      <div class="text-red-600 text-sm mt-1">
+        {{ errorMessage(firstName)! }}
+      </div>
+      }
+    </div>
+
+    <!-- Last name -->
+    <div>
+      <label for="lastName" class="block mb-1">Last name</label>
+      <input
+        id="lastName"
+        type="text"
+        formControlName="lastName"
+        [ngClass]="inputClasses('lastName')"
+        placeholder="Dupont"
+      />
+      @if(isInvalid('lastName')) {
+      <div class="text-red-600 text-sm mt-1">
+        {{ errorMessage(lastName)! }}
+      </div>
+      }
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="email" class="block mb-1">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        [ngClass]="inputClasses('email')"
+        placeholder="example@email.com"
+        autocomplete="email"
+      />
+      @if(isInvalid('email')) {
+      <div class="text-red-600 text-sm mt-1">
+        {{ errorMessage(email)! }}
+      </div>
+      }
+    </div>
+
+    <!-- Password -->
+    <div>
+      <label for="password" class="block mb-1">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        [ngClass]="inputClasses('password')"
+        placeholder="••••••"
+        autocomplete="new-password"
+      />
+      @if (isInvalid('password')) {
+        <div  class="text-red-600 text-sm mt-1">
+          {{ errorMessage(password)! }}
+        </div>
+      }
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="registerForm.invalid"
+      class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Register
+    </button>
+  </form>
+</div>

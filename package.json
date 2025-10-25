@@ -11,15 +11,15 @@
     "start:api": "npm run start:dev --workspace=api",
     "build:front": "npm run build --workspace=front",
     "build:api": "npm run build --workspace=api",
-
     "lint:front": "npm run lint --workspace=front",
     "lint:api": "npm run lint --workspace=api",
     "lint:all": "npm run lint --workspace=api -- --fix && npm run lint --workspace=front -- --fix",
-
     "test:api:rib": "npm run test --workspace=api -- --runInBand",
     "test:front:ci": "npm run test --workspace=front -- --watch=false",
-    "test:all": "npm run test:api:rib && npm run test:front:ci"
-
+    "test:all": "npm run test:api:rib && npm run test:front:ci",
+    "db:gen": "npm run --workspace=api migration:generate",
+    "db:run": "npm run --workspace=api migration:run",
+    "db:revert": "npm run --workspace=api migration:revert"
   },
   "devDependencies": {
     "@angular-eslint/builder": "^20.4.0",
@@ -33,6 +33,7 @@
     "@typescript-eslint/utils": "^8.46.1",
     "eslint": "^9.37.0",
     "eslint-plugin-n": "^17.23.1",
+    "tsconfig-paths": "^4.2.0",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

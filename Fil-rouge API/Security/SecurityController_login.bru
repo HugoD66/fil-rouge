@@ -1,0 +1,18 @@
+meta {
+  name: SecurityController_login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://security/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "",
+    "password": ""
+  }
+}
