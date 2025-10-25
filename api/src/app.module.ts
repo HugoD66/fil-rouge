@@ -37,12 +37,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           ...(url
             ? { url }
             : {
-                host: cfg.get<string>('POSTGRES_HOST'),
-                port: cfg.get<number>('POSTGRES_PORT'),
-                username: cfg.get<string>('POSTGRES_USER'),
-                password: cfg.get<string>('POSTGRES_PASSWORD'),
-                database: cfg.get<string>('POSTGRES_DB'),
-              }),
+              host: cfg.get<string>('POSTGRES_HOST'),
+              port: cfg.get<number>('POSTGRES_PORT'),
+              username: cfg.get<string>('POSTGRES_USER'),
+              password: cfg.get<string>('POSTGRES_PASSWORD'),
+              database: cfg.get<string>('POSTGRES_DB'),
+            }),
           synchronize: false,
           autoLoadEntities: true,
           ssl: ssl ? { rejectUnauthorized: false } : false,

@@ -1,4 +1,3 @@
-// api/src/db/data-source.ts
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as path from 'path';
@@ -11,13 +10,13 @@ function loadEnv(): void {
 
   const candidates = isProd
     ? [
-        path.resolve(process.cwd(), 'api/.env.prod'),
-        path.resolve(process.cwd(), 'api/.env'),
-      ]
+      path.resolve(process.cwd(), 'api/.env.prod'),
+      path.resolve(process.cwd(), 'api/.env'),
+    ]
     : [
-        path.resolve(process.cwd(), 'api/.env'),
-        path.resolve(process.cwd(), 'api/.env.local'),
-      ];
+      path.resolve(process.cwd(), 'api/.env'),
+      path.resolve(process.cwd(), 'api/.env.local'),
+    ];
 
   let loaded = false;
   for (const p of candidates) {
@@ -31,13 +30,13 @@ function loadEnv(): void {
   if (!loaded) {
     const fallback = isProd
       ? [
-          path.resolve(process.cwd(), '.env.prod'),
-          path.resolve(process.cwd(), '.env'),
-        ]
+        path.resolve(process.cwd(), '.env.prod'),
+        path.resolve(process.cwd(), '.env'),
+      ]
       : [
-          path.resolve(process.cwd(), '.env'),
-          path.resolve(process.cwd(), '.env.local'),
-        ];
+        path.resolve(process.cwd(), '.env'),
+        path.resolve(process.cwd(), '.env.local'),
+      ];
     for (const p of fallback) {
       if (fs.existsSync(p)) {
         dotenv.config({ path: p });
@@ -64,7 +63,7 @@ const envSchema = Joi.object({
   .prefs({ abortEarly: false });
 
 type EnvDict = Record<string, string | number | boolean | null | undefined>;
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+ 
 const { value, error } = envSchema.validate(process.env);
 
 if (error) {
@@ -88,15 +87,15 @@ export default new DataSource({
   type: 'postgres',
   ...(useUrl
     ? {
-        url: process.env.DATABASE_URL,
-      }
+      url: process.env.DATABASE_URL,
+    }
     : {
-        host: process.env.POSTGRES_HOST || 'localhost',
-        port: Number(process.env.POSTGRES_PORT) || 5432,
-        username: process.env.POSTGRES_USER,
-        password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB,
-      }),
+      host: process.env.POSTGRES_HOST ?? 'localhost',
+      port: Number(process.env.POSTGRES_PORT ?? 5432),
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+    }),
   ssl:
     process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false,
 

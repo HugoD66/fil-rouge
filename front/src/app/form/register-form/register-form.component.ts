@@ -15,7 +15,7 @@ type RegisterFormModel = {
   standalone: true,
   imports: [ReactiveFormsModule, NgClass],
   templateUrl: './register-form.component.html',
-  styleUrls: ['./register-form.component.scss']
+  styleUrls: ['./register-form.component.scss'],
 })
 export class RegisterFormComponent {
   // === Validators calqués sur le RegisterDto (class-validator) ===
@@ -25,7 +25,7 @@ export class RegisterFormComponent {
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
-    ]
+    ],
   });
 
   public lastName = new FormControl<string>('', {
@@ -34,7 +34,7 @@ export class RegisterFormComponent {
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
-    ]
+    ],
   });
 
   public email = new FormControl<string>('', {
@@ -44,7 +44,7 @@ export class RegisterFormComponent {
       Validators.email,
       Validators.minLength(2),
       Validators.maxLength(50),
-    ]
+    ],
   });
 
   public password = new FormControl<string>('', {
@@ -53,14 +53,14 @@ export class RegisterFormComponent {
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
-    ]
+    ],
   });
 
   public registerForm = new FormGroup<RegisterFormModel>({
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      password: this.password,
+    firstName: this.firstName,
+    lastName: this.lastName,
+    email: this.email,
+    password: this.password,
   });
 
   // Helpers: état d’erreur + classes Tailwind conditionnelles
@@ -103,15 +103,15 @@ export class RegisterFormComponent {
         firstName: payload.firstName,
         lastName: payload.lastName,
         email: payload.email,
-        password: payload.password
+        password: payload.password,
       };
       console.log('RegisterDto ready to be sent:', registerDto);
       const response = await fetch('http://localhost:3000/security/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerDto)
+        body: JSON.stringify(registerDto),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

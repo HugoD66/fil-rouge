@@ -24,7 +24,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/Person"
             }
           }
         ],
@@ -45,7 +45,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/Person"
             }
           }
         ],
@@ -70,7 +70,16 @@
       },
       "delete": {
         "operationId": "PersonController_remove",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/Person"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -140,6 +149,45 @@
   "servers": [],
   "components": {
     "schemas": {
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "0000-0000-0000-0001"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Pierre"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "example": "example@email.com"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "UpdatePersonDto": {
         "type": "object",
         "properties": {

@@ -6,7 +6,7 @@ import {LoginFormComponent} from "@fil-rouge/front/app/form/login-form/login-for
   standalone: true,
   imports: [LoginFormComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
 

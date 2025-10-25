@@ -1,5 +1,5 @@
 module.exports = {
-  root: false,
+  root: true,
   env: { node: true, es2023: true },
-  ignorePatterns: ['dist/', 'node_modules/'],
+  ignorePatterns: ['dist/', 'node_modules/', 'src/**/*.spec.ts'],
 };

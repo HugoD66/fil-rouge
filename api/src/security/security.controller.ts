@@ -21,4 +21,6 @@ export class SecurityController {
     // Todo change return ( AuthResult ? )
     return this.securityService.login(loginDto);
   }
+
+  //Logout
 }

@@ -5,9 +5,9 @@ meta {
 }
 
 get {
-  url: http://Person/{id}
+  url: {{baseUrl}}/person/:id
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:path {

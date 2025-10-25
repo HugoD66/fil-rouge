@@ -1,28 +1,13 @@
-import {
-  INestApplication,
-  ValidationPipe,
-  ClassSerializerInterceptor,
-  HttpStatus,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Test, TestingModule } from '@nestjs/testing';
-import request, { Response } from 'supertest';
-import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+/// <reference types="jest" />
+/* eslint-env jest */
+import request from 'supertest';
+import { HttpStatus } from '@nestjs/common';
+import type { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
-import * as dotenv from 'dotenv';
 
 import { Person } from '@fil-rouge/api/person/entities/person.entity';
-import { PersonService } from '@fil-rouge/api/person/person.service';
-import { PersonController } from '@fil-rouge/api/person/person.controller';
 
-/* ------------------------------ ENV (Postgres) ----------------------------- */
-// Chemin corrigé : test/.env.test
-dotenv.config({ path: 'test/.env.test' });
-
-/* ----------------------------- Utils & factories ---------------------------- */
-
-const makePerson = (overrides: Partial<Person> = {}): Person =>
+const _makePerson = (overrides: Partial<Person> = {}): Person =>
   ({
     id: overrides.id ?? randomUUID(),
     firstName: overrides.firstName ?? 'John',
@@ -35,110 +20,40 @@ const makePerson = (overrides: Partial<Person> = {}): Person =>
     updatedAt: overrides.updatedAt ?? new Date(),
   }) as Person;
 
-/* ---------------------------------- Tests ---------------------------------- */
+describe('PersonController (e2e)', () => {
+  const existingId = 'a45e0835-abf8-495c-8a12-f0c80b08e42b';
+  const anotherId  = 'dcd2788a-dd69-4e12-a1a0-500e1b704a40';
+  const unknownId  = randomUUID();
 
-describe(`${PersonController.name} (e2e)`, () => {
-  let app: INestApplication;
-  let moduleRef: TestingModule;
   let repo: Repository<Person>;
 
-  const existingId = randomUUID();
-  const anotherId = randomUUID();
-  const unknownId = randomUUID();
-
   beforeAll(async () => {
-    moduleRef = await Test.createTestingModule({
-      imports: [
-        // Connexion Postgres (base filrouge_test)
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          url:
-            process.env.DATABASE_URL ??
-            `postgres://${encodeURIComponent(String(process.env.POSTGRES_USER ?? ''))}:${encodeURIComponent(
-              String(process.env.POSTGRES_PASSWORD ?? ''),
-            )}@${String(process.env.POSTGRES_HOST ?? 'localhost')}:${Number(
-              process.env.POSTGRES_PORT ?? '5432',
-            )}/${String(process.env.POSTGRES_DB ?? '')}`,
-          entities: [Person],
-          synchronize: true, // OK en E2E
-          dropSchema: true,  // base propre à chaque run
-          logging: false,
-          retryAttempts: 1,
-        }),
-        TypeOrmModule.forFeature([Person]),
-      ],
-      controllers: [PersonController],
-      providers: [PersonService],
-    }).compile();
+    const ds = (global as any).__DS__;
+    repo = ds.getRepository(Person);
 
-    app = moduleRef.createNestApplication();
-
-    // même config globale que main.ts
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-        forbidUnknownValues: false,
-      }),
-    );
-    app.useGlobalInterceptors(
-      new ClassSerializerInterceptor(app.get(Reflector)),
-    );
-
-    await app.init();
-
-    repo = moduleRef.get<Repository<Person>>(getRepositoryToken(Person));
-
-    // Seed
     await repo.save([
-      makePerson({
-        id: existingId,
-        firstName: 'Pierre',
-        lastName: 'Dupont',
-        email: 'p.dupont@example.com',
-      }),
-      makePerson({
-        id: anotherId,
-        firstName: 'Anne',
-        lastName: 'Martin',
-        email: 'a.martin@example.com',
-      }),
+      { id: existingId, firstName: 'Pierre', lastName: 'Dupont', email: 'p.dupont@example.com', password: 'S3cretP4ss!' } as Person,
+      { id: anotherId,  firstName: 'Anne',   lastName: 'Martin', email: 'a.martin@example.com',  password: 'S3cretP4ss!' } as Person,
     ]);
   });
 
-  afterAll(async () => {
-    await app.close();
-    await moduleRef.close();
-  });
-
-  /* --------------------------------- GET all -------------------------------- */
-
-  describe(`GET /person`, () => {
-    it('Should return a list of persons (200) without password', async () => {
-      const res: Response = await request(app.getHttpServer())
+  describe('GET /person', () => {
+    it('Should return a list without password', async () => {
+      const app = (global as any).__APP__;
+      const res = await request(app.getHttpServer())
         .get('/person')
         .expect(HttpStatus.OK);
 
-      const body: unknown = res.body;
-      expect(Array.isArray(body)).toBe(true);
-
-      if (Array.isArray(body)) {
-        expect(body.length).toBeGreaterThanOrEqual(2);
-        for (const p of body) {
-          const rec = p as Record<string, unknown>;
-          expect(Object.prototype.hasOwnProperty.call(rec, 'password')).toBe(
-            false,
-          );
-        }
+      expect(Array.isArray(res.body)).toBe(true);
+      for (const p of res.body) {
+        expect(Object.prototype.hasOwnProperty.call(p, 'password')).toBe(false);
       }
     });
   });
 
-  /* -------------------------------- GET by id ------------------------------- */
-
-  describe(`GET /person/:id`, () => {
-    it('Should return one person by id (200) without password', async () => {
+  describe('GET /person/:id', () => {
+    it('Should return one person', async () => {
+      const app = (global as any).__APP__;
       const res = await request(app.getHttpServer())
         .get(`/person/${existingId}`)
         .expect(HttpStatus.OK);
@@ -149,26 +64,21 @@ describe(`${PersonController.name} (e2e)`, () => {
         lastName: 'Dupont',
         email: 'p.dupont@example.com',
       });
-      expect(Object.prototype.hasOwnProperty.call(res.body, 'password')).toBe(
-        false,
-      );
+      expect(Object.prototype.hasOwnProperty.call(res.body, 'password')).toBe(false);
     });
 
-    it('Should return 404 when person does not exist', async () => {
+    it('Should return 404 when not found', async () => {
+      const app = (global as any).__APP__;
       await request(app.getHttpServer())
         .get(`/person/${unknownId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
   });
 
-  /* ---------------------------------- PATCH --------------------------------- */
-
-  describe(`PATCH /person/:id`, () => {
-    it('Should partially update and return the person (200)', async () => {
-      const dtoUpdate = {
-        firstName: 'Pierre-Emmanuel',
-        email: 'p.dupont.updated@example.com',
-      };
+  describe('PATCH /person/:id', () => {
+    it('Should partially update and return 200', async () => {
+      const app = (global as any).__APP__;
+      const dtoUpdate = { firstName: 'Pierre-Emmanuel', email: 'p.dupont.updated@example.com' };
 
       const res = await request(app.getHttpServer())
         .patch(`/person/${existingId}`)
@@ -181,13 +91,13 @@ describe(`${PersonController.name} (e2e)`, () => {
         lastName: 'Dupont',
         email: 'p.dupont.updated@example.com',
       });
-      expect(Object.prototype.hasOwnProperty.call(res.body, 'password')).toBe(
-        false,
-      );
+      expect(Object.prototype.hasOwnProperty.call(res.body, 'password')).toBe(false);
     });
 
-    it('Should return 404 when person does not exist', async () => {
+    it('Should return 404 when not found', async () => {
+      const app = (global as any).__APP__;
       const dtoUpdate = { firstName: 'Nobody' };
+
       await request(app.getHttpServer())
         .patch(`/person/${unknownId}`)
         .send(dtoUpdate)
@@ -195,8 +105,9 @@ describe(`${PersonController.name} (e2e)`, () => {
     });
 
     it('Should return 500 on unique email collision', async () => {
-      // mettre l’email de Anne sur Pierre
+      const app = (global as any).__APP__;
       const dtoUpdate = { email: 'a.martin@example.com' };
+
       await request(app.getHttpServer())
         .patch(`/person/${existingId}`)
         .send(dtoUpdate)
@@ -204,10 +115,9 @@ describe(`${PersonController.name} (e2e)`, () => {
     });
   });
 
-  /* ---------------------------------- DELETE -------------------------------- */
-
-  describe(`DELETE /person/:id`, () => {
-    it('Should delete the person (200) then GET returns 404', async () => {
+  describe('DELETE /person/:id', () => {
+    it('Should delete and then 404', async () => {
+      const app = (global as any).__APP__;
       await request(app.getHttpServer())
         .delete(`/person/${anotherId}`)
         .expect(HttpStatus.OK);
@@ -217,7 +127,8 @@ describe(`${PersonController.name} (e2e)`, () => {
         .expect(HttpStatus.NOT_FOUND);
     });
 
-    it('Should return 404 when person does not exist', async () => {
+    it('Should return 404 when not found', async () => {
+      const app = (global as any).__APP__;
       await request(app.getHttpServer())
         .delete(`/person/${unknownId}`)
         .expect(HttpStatus.NOT_FOUND);

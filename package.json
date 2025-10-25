@@ -13,10 +13,11 @@
     "build:api": "npm run build --workspace=api",
     "lint:front": "npm run lint --workspace=front",
     "lint:api": "npm run lint --workspace=api",
-    "lint:all": "npm run lint --workspace=api -- --fix && npm run lint --workspace=front -- --fix",
+    "lint:all": "node ./tools/lint-all.js",
     "test:api:rib": "npm run test --workspace=api -- --runInBand",
+    "test:api:e2e": "npm run test:e2e --workspace=api -- --runInBand",
     "test:front:ci": "npm run test --workspace=front -- --watch=false",
-    "test:all": "npm run test:api:rib && npm run test:front:ci",
+    "test:all": "npm run test:api:rib && npm run test:api:e2e && npm run test:front:ci",
     "db:gen": "npm run --workspace=api migration:generate",
     "db:run": "npm run --workspace=api migration:run",
     "db:revert": "npm run --workspace=api migration:revert"
@@ -28,11 +29,13 @@
     "@angular-eslint/schematics": "^20.4.0",
     "@angular-eslint/template-parser": "^20.4.0",
     "@angular-eslint/utils": "^20.4.0",
+    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
     "@typescript-eslint/utils": "^8.46.1",
     "eslint": "^9.37.0",
     "eslint-plugin-n": "^17.23.1",
+    "supertest": "^7.1.4",
     "tsconfig-paths": "^4.2.0",
     "vite-tsconfig-paths": "^5.1.4"
   }

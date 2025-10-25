@@ -57,7 +57,35 @@ stop_servers() {
   read -rp "Appuie sur Entrée pour revenir au menu..." _
 }
 
-# -----------------------------------------------------------------------------
+# --- Docker helpers -----------------------------------------------------------
+detect_compose_cmd() {
+  # Renvoie dans stdout la bonne commande docker compose (v2 ou legacy)
+  if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+    echo "docker compose"
+    return 0
+  elif command -v docker-compose >/dev/null 2>&1; then
+    echo "docker-compose"
+    return 0
+  else
+    return 1
+  fi
+}
+
+compose_up_in() {
+  # $1 = dossier contenant le compose file (ex: api)
+  local dir="$1"
+  local cmd
+  if ! cmd="$(detect_compose_cmd)"; then
+    echo "⚠️  Ni 'docker compose' ni 'docker-compose' n'ont été trouvés dans le PATH."
+    return 1
+  fi
+
+  echo
+  echo "Démarrage de l'environnement Docker (${dir})..."
+  echo "----------------------------------------------"
+  ( cd "$dir" && ${cmd} up -d )
+}
+# ---------------------------------------------------------------------------
 
 clear
 echo "Monorepo CLI"
@@ -96,48 +124,30 @@ while true; do
         case "$action" in
           "lint & fix")
             echo
-            echo "Exécution du lint + fix sur les workspaces 'api' et 'front'..."
-            echo "------------------------------------------------------------"
+            echo "Exécution du lint + fix en mode monorepo (script racine)..."
+            echo "------------------------------------------------------"
 
-            api_log="$TMPDIR/api-lint.log"
-            front_log="$TMPDIR/front-lint.log"
+            lint_log="$TMPDIR/lint-all.log"
 
             echo
-            echo "=> api: npm run lint --workspace=api -- --fix (logs: $api_log)"
-            if ! npm run lint --workspace=api -- --fix >"$api_log" 2>&1; then
-              echo "Lint api échoué — voir $api_log"
+            echo "=> npm run lint:all (logs: $lint_log)"
+            if ! npm run lint:all >"$lint_log" 2>&1; then
+              echo "Lint monorepo échoué — voir $lint_log"
             else
-              echo "Lint api OK — voir $api_log"
+              echo "Lint monorepo terminé — voir $lint_log"
             fi
 
             echo
-            echo "----- Erreurs / Warnings (api) -----"
-            if grep -i -E 'error|warning' "$api_log" >/dev/null 2>&1; then
-              grep -n -i -E 'error|warning' "$api_log" || true
+            echo "----- Erreurs / Warnings (monorepo) -----"
+            if grep -i -E 'error|warning' "$lint_log" >/dev/null 2>&1; then
+              grep -n -i -E 'error|warning' "$lint_log" || true
             else
-              echo "(Aucun 'error' ou 'warning' trouvé dans le log de api.)"
+              echo "(Aucun 'error' ou 'warning' trouvé dans le log.)"
             fi
-            echo "-------------------------------------"
+            echo "-----------------------------------------"
 
             echo
-            echo "=> front: npm run lint --workspace=front -- --fix (logs: $front_log)"
-            if ! npm run lint --workspace=front -- --fix >"$front_log" 2>&1; then
-              echo "Lint front échoué — voir $front_log"
-            else
-              echo "Lint front OK — voir $front_log"
-            fi
-
-            echo
-            echo "----- Erreurs / Warnings (front) -----"
-            if grep -i -E 'error|warning' "$front_log" >/dev/null 2>&1; then
-              grep -n -i -E 'error|warning' "$front_log" || true
-            else
-              echo "(Aucun 'error' ou 'warning' trouvé dans le log de front.)"
-            fi
-            echo "---------------------------------------"
-
-            echo
-            echo "Lint & fix terminé pour api + front. Appuie sur Entrée pour retourner au menu..."
+            echo "Lint & fix terminé. Appuie sur Entrée pour retourner au menu..."
             read -r
             break
             ;;
@@ -148,9 +158,9 @@ while true; do
       done
 
     elif [[ "$target" == "tests" ]]; then
-      select action in "run (api RIB → front)" "api only (RIB)" "front only" "Retour" "Quitter"; do
+      select action in "run (Jest -> E2E  → front)" "api only" "front only" "Retour" "Quitter"; do
         case "$action" in
-          "run (api RIB → front)")
+          "run (Jest -> E2E  → front)")
             echo
             echo "Lancement des tests API (runInBand) puis FRONT..."
             echo "-----------------------------------------------"
@@ -159,7 +169,7 @@ while true; do
             read -rp "Appuie sur Entrée pour retourner au menu..." _
             break
             ;;
-          "api only (RIB)")
+          "api only")
             npm run test:api:rib || true
             echo
             read -rp "Appuie sur Entrée pour retourner..." _
@@ -216,10 +226,20 @@ while true; do
                       echo
                       echo "Démarrage du serveur 'api'..."
                       echo "-----------------------------"
+
+                      if ! compose_up_in "api"; then
+                        echo "❌ Échec du démarrage Docker pour 'api'."
+                        echo "   Abandon du lancement Nest (corrige Docker puis réessaie)."
+                        echo
+                        read -rp "Appuie sur Entrée pour revenir..." _
+                        continue
+                      fi
+
                       npm run start --workspace=api
                       echo
                       echo "Processus terminé pour 'api'."
                       ;;
+
 
                     "migrations: generate")
                       echo

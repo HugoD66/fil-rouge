@@ -10,13 +10,13 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @Length(2, 50)
-  firstName!: string;
+    firstName!: string;
 
   @ApiProperty({ minLength: 2, maxLength: 50, example: 'Dupont' })
   @IsString()
   @IsNotEmpty()
   @Length(2, 50)
-  lastName!: string;
+    lastName!: string;
 
   @ApiProperty({ minLength: 2, maxLength: 50, example: 'example@email.com' })
   @IsString()

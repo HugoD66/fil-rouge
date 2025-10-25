@@ -2,10 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@fil-rouge/api/app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type {
+  INestApplication} from '@nestjs/common';
 import {
   ValidationPipe,
   ClassSerializerInterceptor,
-  INestApplication,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
@@ -17,7 +18,7 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const port = Number(config.get('PORT')) || 3000;
   const domain = config.get<string>('DOMAIN') ?? undefined;
-  const corsOrigin = config.get<string>('CORS_ORIGIN') || undefined;
+  const corsOrigin = config.get<string>('CORS_ORIGIN') ?? undefined;
 
   configureGlobalValidationAndSerialization(app);
 
@@ -33,9 +34,7 @@ async function bootstrap(): Promise<void> {
   console.log(`📄 OpenAPI JSON: http://${domain}:${port}/docs-json`);
 }
 
-async function configureSwaggerIfDev(
-  app: INestApplication<any>,
-): Promise<void> {
+async function configureSwaggerIfDev(app: INestApplication<any>): Promise<void> {
   if (process.env.NODE_ENV !== 'production') {
     const swaggerCfg = new DocumentBuilder()
       .setTitle('Fil-rouge API')
@@ -62,17 +61,13 @@ async function configureSwaggerIfDev(
   }
 }
 
-function configureGlobalValidationAndSerialization(
-  app: INestApplication<any>,
-): void {
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      forbidUnknownValues: false,
-    }),
-  );
+function configureGlobalValidationAndSerialization(app: INestApplication<any>): void {
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+    forbidUnknownValues: false,
+  }));
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 }

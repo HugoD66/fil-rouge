@@ -5,10 +5,10 @@ import {RegisterFormComponent} from "@fil-rouge/front/app/form/register-form/reg
   selector: 'app-register',
   standalone: true,
   imports: [
-    RegisterFormComponent
+    RegisterFormComponent,
   ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
 

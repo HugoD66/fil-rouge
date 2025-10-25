@@ -1,20 +1,17 @@
 {
   "preset": "ts-jest",
   "testEnvironment": "node",
-  "rootDir": ".",
+  "rootDir": "../",
   "moduleFileExtensions": ["ts", "js", "json"],
   "testMatch": ["<rootDir>/**/*.e2e-spec.ts"],
   "transform": {
-    "^.+\\.(t|j)s$": [
-      "ts-jest",
-      {
-        "tsconfig": "<rootDir>/tsconfig.e2e.json"
-      }
-    ]
+    "^.+\\.(t|j)s$": ["ts-jest", { "tsconfig": "<rootDir>/test/tsconfig.e2e.json" }]
   },
   "moduleNameMapper": {
-    "^@fil-rouge/api/(.*)$": "<rootDir>/../src/$1",
-    "^@fil-rouge/api$": "<rootDir>/../src/index.ts"
+    // `rootDir` dans ce fichier pointe vers `api/`, donc mapper vers `api/src`
+    "^@fil-rouge/api/(.*)$": "<rootDir>/src/$1",
+    "^@fil-rouge/api$": "<rootDir>/src/index.ts"
   },
-  "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"]
+  "setupFilesAfterEnv": ["<rootDir>/test/setup-e2e.ts"],
+  "maxWorkers": 1
 }

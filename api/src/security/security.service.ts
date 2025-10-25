@@ -44,10 +44,8 @@ export class SecurityService {
       return saved;
     } catch (error: unknown) {
       await queryRunner.rollbackTransaction();
-      throw new Error(
-        'Registration failed' +
-          (error instanceof Error ? `: ${error.message}` : ''),
-      );
+      throw new Error('Registration failed' +
+          (error instanceof Error ? `: ${error.message}` : ''));
     } finally {
       await queryRunner.release();
     }

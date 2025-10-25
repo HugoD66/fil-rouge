@@ -5,14 +5,14 @@ import {RegisterComponent} from "@fil-rouge/front/app/pages/register/register.co
 export const routes: Routes = [{
   path: '',
   component: LoginComponent,
-  },
-  {
-    path: 'register',
-    component: RegisterComponent
-  },
-  { path: '', redirectTo: '/', pathMatch: 'full' },
-  {
-    path: '**',
-    redirectTo: '/'
-  },
+},
+{
+  path: 'register',
+  component: RegisterComponent,
+},
+{ path: '', redirectTo: '/', pathMatch: 'full' },
+{
+  path: '**',
+  redirectTo: '/',
+},
 ];

@@ -77,18 +77,17 @@ Pour lancer le lint sur les deux workspaces (`api` puis `front`) et appliquer le
   npm run lint:all
   ```
 
-  Ce script exécute en séquence :
-  1) `npm run lint --workspace=api -- --fix`
-  2) `npm run lint --workspace=front -- --fix`
+  Ce script exécute `eslint` depuis la racine (config centralisée `eslint.config.mjs`), applique les correctifs auto‑fixables et écrit la sortie dans `eslint-report.log` à la racine du repo.
 
-  Il applique les correctifs auto‑fixables et affiche en console les erreurs/warnings restantes.
+- Via le menu fourni dans `bin/monorepo` (bash) : lance `./bin/monorepo` depuis la racine, choisis `lint` → `lint & fix (monorepo)`.
 
-- Via le menu fourni dans `bin/monorepo` (bash) : lance `./bin/monorepo` depuis la racine, choisis `lint` → `lint & fix (api + front)`.
-- Via PowerShell (Windows) : lance `PowerShell -NoProfile -ExecutionPolicy Bypass -File .\bin\monorepo.ps1` puis option `lint` → `lint & fix`.
+- Le script `npm run lint:all` utilise le script `tools/lint-all.js` qui :
+  1) exécute `npx eslint . --ext .ts,.html --fix --max-warnings=0`,
+  2) imprime la sortie en console,
+  3) écrit la sortie dans `eslint-report.log`.
 
-Notes :
-- Le script menu capture la sortie de chaque lint dans des logs temporaires et extrait/affiche les lignes contenant `error` ou `warning` pour faciliter la lecture.
-- Si tu veux conserver les logs de manière persistante, on peut configurer le script pour écrire dans `./logs/` au lieu d'un répertoire temporaire.
+- Note importante :
+  - Les patterns d'ignore sont maintenant centralisés dans `eslint.config.mjs` (propriété `ignores`). Garde le fichier `.eslintignore` vide ou supprime-le pour éviter l'avertissement d'ESLint qui recommande d'utiliser `ignores` dans la config plate.
 
 ## Liste synthétique des règles ESLint (config racine)
 
@@ -189,11 +188,11 @@ La configuration centrale du monorepo est définie dans `eslint.config.mjs`. En 
     - Comment corriger : remplacer `a || b` par `a ?? b` si l'intention est de vérifier uniquement null/undefined.
     - Exemple :
       ```ts
-      // violation (si on veut préserver 0 ou '')
-      const x = value || 'default';
+      // violation
+      const maybeValueOr = value || 'default';
 
-      // correction
-      const x = value ?? 'default';
+      // correction - utiliser la coalescence nulle si on veut traiter seulement null/undefined
+      const maybeValueNullish = value ?? 'default';
       ```
 
   - Préfère `?.` / chaînes optionnelles et opérateurs facultatifs (`@typescript-eslint/prefer-optional-chain`):
@@ -214,10 +213,10 @@ La configuration centrale du monorepo est définie dans `eslint.config.mjs`. En 
     - Exemple :
       ```ts
       // violation
-      const x = y as string; // alors que y est déjà string
+      const x_asserted = y as string; // alors que y est déjà string
 
       // correction
-      const x = y;
+      const x_without_assert = y;
       ```
 
   - Vérifie l'exhaustivité des `switch` sur les unions discriminées (`@typescript-eslint/switch-exhaustiveness-check`):
@@ -291,15 +290,13 @@ La configuration centrale du monorepo est définie dans `eslint.config.mjs`. En 
     - Comment corriger : supprimer la méthode si elle est vide, ou y ajouter un commentaire expliquant pourquoi elle est volontairement vide. Si la méthode est nécessaire pour l’implémentation d’une interface, implémente uniquement ce qui est requis.
     - Exemple :
       ```ts
-      // violation
-      ngOnInit() {}
-
-      // correction
-      // soit supprimer la méthode si inutile
-      // soit documenter pourquoi elle est vide
-      ngOnInit() {
-        // intentionally left blank because ...
-      }
+      // violation: méthode de cycle de vie vide — l'exemple ci‑dessous est montré
+      // sous forme de commentaires pour éviter les erreurs de parsing dans la
+      // documentation. Dans le code réel, supprimez la méthode si elle est vide
+      // ou ajoutez un commentaire explicatif.
+      // Exemples (illustratifs seulement) :
+      // ngOnInit(): void {}
+      // ngOnInit(): void { /* intentionally left blank because ... */ }
       ```
 
 - Plugin Node (`eslint-plugin-n`) — règles appliquées sur `api` :

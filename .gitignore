@@ -33,3 +33,5 @@ pnpm-debug.log*
 
 # IDE / éditeur
 .idea/
+
+eslint-report.log

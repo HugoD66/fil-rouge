@@ -14,7 +14,9 @@ const __dirname = path.dirname(__filename);
 const candidateTsconfigs = [
     path.join(__dirname, "tsconfig.json"),
     path.join(__dirname, "front", "tsconfig.json"),
-    path.join(__dirname, "api", "tsconfig.json")
+    path.join(__dirname, "api", "tsconfig.json"),
+    path.join(__dirname, "api", "tsconfig.spec.json"),
+    path.join(__dirname, "api", "test", "tsconfig.e2e.json"),
 ];
 const tsconfigProjects = candidateTsconfigs.filter(p => fs.existsSync(p));
 
@@ -38,7 +40,13 @@ export default [
                 setTimeout: "readonly",
                 clearTimeout: "readonly",
                 setInterval: "readonly",
-                clearInterval: "readonly"
+                clearInterval: "readonly",
+                // Node globals commonly used in backend and scripts
+                process: 'readonly',
+                require: 'readonly',
+                module: 'readonly',
+                __dirname: 'readonly',
+                global: 'readonly'
             }
         },
         plugins: {
@@ -49,6 +57,11 @@ export default [
         },
         rules: {
             "no-unused-vars": "off",
+            "indent": ["error", 2],
+            // Forcer les retours à la ligne des paramètres quand la signature est multi‑ligne
+            "function-paren-newline": ["error", "multiline"],
+            "function-call-argument-newline": ["error", "consistent"],
+            "comma-dangle": ["error", "always-multiline"],
             "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
             "@typescript-eslint/consistent-type-imports": ["error"],
             "@typescript-eslint/consistent-type-definitions": ["error", "type"],
@@ -90,7 +103,7 @@ export default [
         },
     },
     {
-        files: ["**/*.spec.ts", "**/__tests__/**"],
+        files: ["**/*.spec.ts", "**/*.e2e-spec.ts", "**/__tests__/**", "test/**", "**/test/**"],
         languageOptions: {
             globals: {
                 describe: "readonly",
@@ -99,6 +112,8 @@ export default [
                 expect: "readonly",
                 beforeEach: "readonly",
                 afterEach: "readonly",
+                beforeAll: "readonly",
+                afterAll: "readonly",
                 jest: "readonly"
             }
         }
@@ -116,11 +131,46 @@ export default [
         }
     },
     {
+        files: ["**/*.js", "**/*.cjs", "tools/**", "*.cjs"],
+        languageOptions: {
+            // Node globals used in JS scripts/configs
+            globals: {
+                require: 'readonly',
+                module: 'readonly',
+                process: 'readonly',
+                __dirname: 'readonly',
+                console: 'readonly',
+                global: 'readonly'
+            }
+        },
+    },
+    {
+        files: ["front/**/*.ts", "front/**/*.tsx", "front/**/*.html"],
+        languageOptions: {
+            globals: {
+                fetch: 'readonly'
+            }
+        }
+    },
+    {
         ignores: [
+            "node_modules/",
+            "dist/",
             "**/dist/**",
-            "**/node_modules/**",
+            "coverage/",
             "**/coverage/**",
-            "**/.angular/**"
+            "api/dist/",
+            "front/dist/",
+            "api/src/**/*.js",
+            "front/src/**/*.js",
+            "src/**/*.js",
+            "tools/",
+            "eslint-report.log",
+            ".env",
+            "**/.env*",
+            "**/.angular/**",
+            ".vscode/",
+            ".idea/"
         ]
     }
 ];

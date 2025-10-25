@@ -30,7 +30,7 @@
     "sourceMap": true,
     "outDir": "./dist",
 
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts"]
 }

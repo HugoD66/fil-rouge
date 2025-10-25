@@ -38,10 +38,10 @@ export class Person {
   @ApiProperty({ type: Date, example: '2024-01-01T12:00:00Z' })
   @CreateDateColumn()
   @Expose()
-  createdAt: Date;
+    createdAt: Date;
 
   @ApiProperty({ type: Date, example: '2024-01-01T12:00:00Z' })
   @UpdateDateColumn()
   @Expose()
-  updatedAt: Date;
+    updatedAt: Date;
 }
